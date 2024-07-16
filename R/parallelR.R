@@ -17,7 +17,7 @@ chunk_object = function(object, ncores){
   # Create a vector with the number of tasks to be assigned to each core.
   # Each core receives a minimum of quotient tasks with remainder cores receiving one additional task
   ntasks_per_core = rep(quotient, ncores)
-  ntasks_per_core[seq.int(remainder)] = ntasks_per_core[seq.int(remainder)] + 1
+  if(remainder > 0){ntasks_per_core[seq.int(remainder)] = ntasks_per_core[seq.int(remainder)] + 1}
   
   # Create a vector with the indices for the first element in each chunk
   chunk_starts = c(1, cumsum(ntasks_per_core) + 1)
@@ -31,22 +31,22 @@ chunk_object = function(object, ncores){
   
 }
 
-#' Execute a parallel for loop evaluating a call on each element in an object
+#' Call a function on each element in an object in parallel
 #' 
 #' @param object Any iterable object.
 #' @param ncores Integer indicating the number of cores to use. 
-#' @param call A call created with quote() to be executed on each element in object. 
-#' Must refer to the element as iterator_element inside the call. Should not use the $ operator.
+#' @param parallel_function Any function which takes a single argument and returns a result. 
 #' @param packages A vector with the names of packages to export to the cluster cores. Default is NULL.
-#' @param exported_objects A vector with the names of objects to export to the cluster nodes. Default is to try to infer them using all.vars(call). 
-#' @param combine A function or the name of a function used to combine the results of the for loop. 
-#' @return The results of executing the call on each element of object and combining as specified. 
+#' @param exported_objects A vector with the names of objects to optionally export to the cluster nodes. 
+#' @param combine_function A function or the name of a function used to combine the results of the for loop. Default is c. 
+#' @return The results of executing parallel_function on each element of object and combining as specified. 
 #' @export
-parallel_call = function(object, ncores, call, packages = NULL, exported_objects = NULL){
+parallelize = function(object, ncores, parallel_function, packages = NULL, 
+  exported_objects = NULL, combine_function = c){
   
-  # Check that call is a call object and that it contains a variable called i
-  if(!is(call, "call")){stop("call should be a call object")}
-  if(!"iterator_element" %in% all.vars(call)){stop(paste("call must contain a parameter called iterator_element"))}
+  # Check that both parallel_function and combine_function are functions
+  parallel_function = match.fun(parallel_function)
+  combine_function = match.fun(combine_function)
   
   # Make a cluster with the specified number of cores and register it
   cl = parallel::makeCluster(ncores)
@@ -54,15 +54,10 @@ parallel_call = function(object, ncores, call, packages = NULL, exported_objects
   on.exit(parallel::stopCluster(cl))
   `%dopar%` = foreach::`%dopar%`
   
-  # Get the name of all exported objects (excluding the loop index variable and T and F)
-  if(is.null(exported_objects)){
-    exported_objects = setdiff(all.vars(call), c("i", "T", "F"))
-  }
-  
-  # Loop through the object and evaluate the call
+  # Loop through the object and execute the function
   results = foreach::foreach(iterator_element = object, 
-    .packages = packages, .export = exported_objects, .combine = combine) %dopar% {
-      eval(call)
+    .packages = packages, .export = exported_objects, .combine = combine_function) %dopar% {
+      parallel_function(iterator_element)
     }
   
   # Add names of object to results

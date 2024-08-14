@@ -39,10 +39,11 @@ chunk_object = function(object, ncores){
 #' @param packages A vector with the names of packages to export to the cluster cores. Default is NULL.
 #' @param exported_objects A vector with the names of objects to optionally export to the cluster nodes. 
 #' @param combine_function A function or the name of a function used to combine the results of the for loop. Default is c. 
+#' @param ... Optional additional arguments to supply to parallale_function. 
 #' @return The results of executing parallel_function on each element of object and combining as specified. 
 #' @export
 parallelize = function(object, ncores, parallel_function, packages = NULL, 
-  exported_objects = NULL, combine_function = c){
+  exported_objects = NULL, combine_function = c, ...){
   
   # Check that both parallel_function and combine_function are functions
   parallel_function = match.fun(parallel_function)
@@ -57,7 +58,7 @@ parallelize = function(object, ncores, parallel_function, packages = NULL,
   # Loop through the object and execute the function
   results = foreach::foreach(iterator_element = object, 
     .packages = packages, .export = exported_objects, .combine = combine_function) %dopar% {
-      parallel_function(iterator_element)
+      parallel_function(iterator_element, ...)
     }
   
   # Add names of object to results

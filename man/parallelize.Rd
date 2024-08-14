@@ -10,7 +10,8 @@ parallelize(
   parallel_function,
   packages = NULL,
   exported_objects = NULL,
-  combine_function = c
+  combine_function = c,
+  ...
 )
 }
 \arguments{
@@ -25,6 +26,8 @@ parallelize(
 \item{exported_objects}{A vector with the names of objects to optionally export to the cluster nodes.}
 
 \item{combine_function}{A function or the name of a function used to combine the results of the for loop. Default is c.}
+
+\item{...}{Optional additional arguments to supply to parallale_function.}
 }
 \value{
 The results of executing parallel_function on each element of object and combining as specified.

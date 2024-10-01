@@ -68,3 +68,33 @@ parallelize = function(object, ncores, parallel_function, packages = NULL,
   return(results)
   
 }
+
+#' Download a group of files in parallel
+#' 
+#' @param urls A vector of URLs for files to download
+#' @param directory A path to a directory download files into. Will be created if it doesn't exist.
+#' @param ncores Integer indicating the number of cores to use. 
+#' @param print_progress A logical value indicating whether to print download progress or not. Default is FALSE. 
+#' @return The paths to the downloaded files.
+#' @export
+parallel_download = function(urls, directory, ncores, print_progress = FALSE){
+  
+  # Create directory if it doesn't exist
+  if(!dir.exists(directory)){dir.create(directory)}
+  
+  # Make a cluster with the specified number of cores and register it
+  cl = parallel::makeCluster(ncores)
+  doParallel::registerDoParallel(cl, ncores)
+  on.exit(parallel::stopCluster(cl))
+  `%dopar%` = foreach::`%dopar%`
+  
+  # Create a function to download files into specified directory
+  download_function = function(url){system(paste("wget -P", directory, url), ignore.stderr = !print_progress)}
+  
+  # Loop through the object and execute the function
+  foreach::foreach(url = urls) %dopar% {download_function(url)}
+  
+  # Return results
+  return(list.files(path = directory, full.names = T))
+  
+}

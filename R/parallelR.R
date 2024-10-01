@@ -39,7 +39,7 @@ chunk_object = function(object, ncores){
 #' @param packages A vector with the names of packages to export to the cluster cores. Default is NULL.
 #' @param exported_objects A vector with the names of objects to optionally export to the cluster nodes. 
 #' @param combine_function A function or the name of a function used to combine the results of the for loop. Default is c. 
-#' @param ... Optional additional arguments to supply to parallale_function. 
+#' @param ... Optional additional arguments to supply to parallel_function. 
 #' @return The results of executing parallel_function on each element of object and combining as specified. 
 #' @export
 parallelize = function(object, ncores, parallel_function, packages = NULL, 
@@ -71,7 +71,7 @@ parallelize = function(object, ncores, parallel_function, packages = NULL,
 
 #' Download a group of files in parallel
 #' 
-#' @param urls A vector of URLs for files to download
+#' @param urls A vector of URLs for files to download.
 #' @param directory A path to a directory download files into. Will be created if it doesn't exist.
 #' @param ncores Integer indicating the number of cores to use. 
 #' @param print_progress A logical value indicating whether to print download progress or not. Default is FALSE. 

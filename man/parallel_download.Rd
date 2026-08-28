@@ -7,7 +7,7 @@
 parallel_download(urls, directory, ncores, print_progress = FALSE)
 }
 \arguments{
-\item{urls}{A vector of URLs for files to download}
+\item{urls}{A vector of URLs for files to download.}
 
 \item{directory}{A path to a directory download files into. Will be created if it doesn't exist.}
 

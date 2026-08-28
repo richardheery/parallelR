@@ -27,7 +27,7 @@ parallelize(
 
 \item{combine_function}{A function or the name of a function used to combine the results of the for loop. Default is c.}
 
-\item{...}{Optional additional arguments to supply to parallale_function.}
+\item{...}{Optional additional arguments to supply to parallel_function.}
 }
 \value{
 The results of executing parallel_function on each element of object and combining as specified.
